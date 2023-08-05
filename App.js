@@ -4,18 +4,33 @@ import { StyleSheet, ImageBackground, SafeAreaView } from 'react-native';
 
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useFonts } from 'expo-font';
+import AppLoading from 'expo-app-loading';
 
 import { Colors } from './constants/colors';
 
 import StartGameScreen from './screens/StartGameScreen';
 import GameScreen from './screens/GameScreen';
+import GameOverScreen from './screens/GameOverScreen';
 
 export default function App() {
   const [userNumber, setUserNumber] = useState();
 
+  const [gameOver, setGameOver] = useState(false);
+
+  const [fontsLoaded] = useFonts({
+    'open-sans': require('./assets/fonts/OpenSans-Regular.ttf'),
+    'open-sans-bold': require('./assets/fonts/OpenSans-Bold.ttf'),
+  });
+
   const startGameHandler = (selectedNumber) => {
     setUserNumber(selectedNumber);
+    setGameOver(false);
   };
+
+  if (!fontsLoaded) {
+    return <AppLoading />;
+  }
 
   return (
     <>
@@ -31,8 +46,15 @@ export default function App() {
           imageStyle={styles.image}
         >
           <SafeAreaView style={styles.rootScreen}>
-            {!userNumber && <StartGameScreen onStartGame={startGameHandler} />}
-            {userNumber && <GameScreen userChoice={userNumber} />}
+            {userNumber ? (
+              !gameOver ? (
+                <GameScreen userChoice={userNumber} setGameOver={setGameOver} />
+              ) : (
+                <GameOverScreen userNumber={userNumber} />
+              )
+            ) : (
+              <StartGameScreen onStartGame={startGameHandler} />
+            )}
           </SafeAreaView>
         </ImageBackground>
       </LinearGradient>
